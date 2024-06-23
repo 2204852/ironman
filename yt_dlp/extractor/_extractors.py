@@ -124,6 +124,7 @@ from .americastestkitchen import (
     AmericasTestKitchenIE,
     AmericasTestKitchenSeasonIE,
 )
+from .amvnews import AMVNewsIE
 from .anchorfm import AnchorFMEpisodeIE
 from .angel import AngelIE
 from .antenna import (
