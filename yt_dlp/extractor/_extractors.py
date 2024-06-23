@@ -1704,6 +1704,7 @@ from .rinsefm import (
     RinseFMIE,
 )
 from .rmcdecouverte import RMCDecouverteIE
+from .roblox import RobloxIE
 from .rockstargames import RockstarGamesIE
 from .rokfin import (
     RokfinChannelIE,
