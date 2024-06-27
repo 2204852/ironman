@@ -38,7 +38,6 @@ def group_or_none(n):
 curl_cffi_version = tuple(int_or_none(group_or_none(n), default=0) for n in curl_cffi.__version__.split('.'))
 
 if curl_cffi_version != (0, 5, 10) and not ((0, 7, 0) <= curl_cffi_version < (0, 8, 0)):
-    print(curl_cffi_version)
     curl_cffi._yt_dlp__version = f'{curl_cffi.__version__} (unsupported)'
     raise ImportError('Only curl_cffi versions 0.5.10, 0.7.X are supported')
 
