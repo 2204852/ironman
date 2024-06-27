@@ -29,13 +29,7 @@ if curl_cffi is None:
     raise ImportError('curl_cffi is not installed')
 
 
-def group_or_none(n):
-    r = re.match(r'\d+', n)
-    if r:
-        return r.group()
-
-
-curl_cffi_version = tuple(int_or_none(group_or_none(n), default=0) for n in curl_cffi.__version__.split('.'))
+curl_cffi_version = tuple(int_or_none(re.match(r'(\d+)?', n).group(), default=0) for n in curl_cffi.__version__.split('.'))
 
 if curl_cffi_version != (0, 5, 10) and not ((0, 7, 0) <= curl_cffi_version < (0, 8, 0)):
     curl_cffi._yt_dlp__version = f'{curl_cffi.__version__} (unsupported)'
