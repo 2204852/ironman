@@ -10,7 +10,7 @@ from ..utils import (
 
 class DigitalConcertHallIE(InfoExtractor):
     IE_DESC = 'DigitalConcertHall extractor'
-    _VALID_URL = r'https?://(?:www\.)?digitalconcerthall\.com/(?P<language>[a-z]+)/(?P<type>film|concert)/(?P<id>[0-9]+)'
+    _VALID_URL = r'https?://(?:www\.)?digitalconcerthall\.com/(?P<language>[a-z]+)/(?P<type>film|concert|work)/(?P<id>[0-9]+)-?(?P<part>[0-9]+)?'
     _OAUTH_URL = 'https://api.digitalconcerthall.com/v2/oauth2/token'
     _ACCESS_TOKEN = None
     _NETRC_MACHINE = 'digitalconcerthall'
@@ -52,6 +52,16 @@ class DigitalConcertHallIE(InfoExtractor):
             'album_artist': 'Frank Peter Zimmermann / Benedikt von Bernstorff / Jakob von Bernstorff',
         },
         'params': {'skip_download': 'm3u8'},
+    }, {
+        'note': 'Concert with several works and an interview',
+        'url': 'https://www.digitalconcerthall.com/en/work/53785-1',
+        'info_dict': {
+            'id': '53785',
+            'album_artist': 'Berliner Philharmoniker / Kirill Petrenko',
+            'title': 'Kirill Petrenko conducts Mendelssohn and Shostakovich',
+        },
+        'params': {'skip_download': 'm3u8'},
+        'playlist_count': 1,
     }]
 
     def _perform_login(self, username, password):
@@ -119,7 +129,7 @@ class DigitalConcertHallIE(InfoExtractor):
             }
 
     def _real_extract(self, url):
-        language, type_, video_id = self._match_valid_url(url).group('language', 'type', 'id')
+        language, type_, video_id, part = self._match_valid_url(url).group('language', 'type', 'id', 'part')
         if not language:
             language = 'en'
 
@@ -131,13 +141,20 @@ class DigitalConcertHallIE(InfoExtractor):
             **parse_resolution(thumbnail_url),
         }]
 
+        url = f'https://api.digitalconcerthall.com/v2/{type_}/{video_id}'
+        if type_ == 'work':
+            url = f'https://api.digitalconcerthall.com/v2/concert/{video_id}'
+
         vid_info = self._download_json(
-            f'https://api.digitalconcerthall.com/v2/{type_}/{video_id}', video_id, headers={
+            url, video_id, headers={
                 'Accept': 'application/json',
                 'Accept-Language': language,
             })
         album_artist = ' / '.join(traverse_obj(vid_info, ('_links', 'artist', ..., 'name')) or '')
         videos = [vid_info] if type_ == 'film' else traverse_obj(vid_info, ('_embedded', ..., ...))
+
+        if type_ == 'work':
+            videos = [videos[int(part) - 1]]
 
         return {
             '_type': 'playlist',
